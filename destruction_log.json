@@ -1,0 +1,26 @@
+[
+    {
+        "certificate_id": "ZT-C343297A",
+        "timestamp": "2026-04-09T22:10:47.516353",
+        "target_path": "C:\\ecommerce project\\ecommerce",
+        "files_destroyed": 499,
+        "method": "DoD 5220.22-M (3-Pass Cryptographic Overwrite)",
+        "status": "VERIFIED_DESTROYED"
+    },
+    {
+        "certificate_id": "ZT-3890EB07",
+        "timestamp": "2026-04-09T22:19:18.235549",
+        "target_path": "C:\\crud js",
+        "files_destroyed": 0,
+        "method": "DoD 5220.22-M (3-Pass Cryptographic Overwrite)",
+        "status": "VERIFIED_DESTROYED"
+    },
+    {
+        "certificate_id": "ZT-1CA80EEB",
+        "timestamp": "2026-04-09T22:19:56.669036",
+        "target_path": "C:\\excel learning\\Data spliting",
+        "files_destroyed": 1,
+        "method": "DoD 5220.22-M (3-Pass Cryptographic Overwrite)",
+        "status": "VERIFIED_DESTROYED"
+    }
+]

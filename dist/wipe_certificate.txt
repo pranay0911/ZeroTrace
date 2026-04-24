@@ -1,0 +1,312 @@
+import os
+import random
+import hashlib
+import subprocess
+import tkinter as tk
+from tkinter import filedialog, messagebox, ttk
+from datetime import datetime
+
+import qrcode
+
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image
+from reportlab.lib.styles import getSampleStyleSheet
+
+# -------------------------
+# MAIN WINDOW
+# -------------------------
+
+root = tk.Tk()
+root.title("Secure Data Wiping Tool")
+root.geometry("650x640")
+root.configure(bg="#1e1e1e")
+
+# -------------------------
+# SECURITY STATUS
+# -------------------------
+
+status = tk.Label(
+    root,
+    text="Security Status: Protected",
+    fg="#00ff9c",
+    bg="#1e1e1e",
+    font=("Segoe UI",12,"bold")
+)
+status.pack(pady=10)
+
+# -------------------------
+# PROGRESS BAR
+# -------------------------
+
+progress = ttk.Progressbar(root, length=420, mode="determinate")
+progress.pack(pady=10)
+
+# -------------------------
+# LOG FILE
+# -------------------------
+
+log_file = "wipe_log.txt"
+
+def log_action(text):
+
+    with open(log_file,"a") as f:
+        f.write(f"{datetime.now()} - {text}\n")
+
+# -------------------------
+# SHA256 HASH
+# -------------------------
+
+def generate_hash():
+
+    sha = hashlib.sha256()
+
+    with open(log_file,"rb") as f:
+        while True:
+
+            data = f.read(4096)
+
+            if not data:
+                break
+
+            sha.update(data)
+
+    return sha.hexdigest()
+
+# -------------------------
+# QR CODE
+# -------------------------
+
+def generate_qr(data):
+
+    img = qrcode.make(data)
+
+    qr_file = "hash_qr.png"
+    img.save(qr_file)
+
+    return qr_file
+
+# -------------------------
+# OPENSSL SIGNATURE
+# -------------------------
+
+def sign_log():
+
+    signature = "log_signature.sig"
+
+    try:
+
+        subprocess.run([
+            "openssl",
+            "dgst",
+            "-sha256",
+            "-sign",
+            "private.pem",
+            "-out",
+            signature,
+            log_file
+        ])
+
+    except:
+        pass
+
+# -------------------------
+# WIPE FILE
+# -------------------------
+
+def wipe_file(path):
+
+    try:
+
+        size = os.path.getsize(path)
+
+        with open(path,"wb") as f:
+            f.write(os.urandom(size))
+
+        os.remove(path)
+
+        log_action(f"Wiped file: {path}")
+
+    except Exception as e:
+        messagebox.showerror("Error",str(e))
+
+# -------------------------
+# WIPE FILE BUTTON
+# -------------------------
+
+def select_file():
+
+    file_path = filedialog.askopenfilename()
+
+    if not file_path:
+        return
+
+    progress["value"] = 0
+    root.update()
+
+    wipe_file(file_path)
+
+    progress["value"] = 100
+
+    messagebox.showinfo("Success","File wiped successfully")
+
+# -------------------------
+# WIPE FOLDER
+# -------------------------
+
+def select_folder():
+
+    folder = filedialog.askdirectory()
+
+    if not folder:
+        return
+
+    files = []
+
+    for r,d,f in os.walk(folder):
+        for file in f:
+            files.append(os.path.join(r,file))
+
+    total = len(files)
+
+    if total == 0:
+        return
+
+    for i,file in enumerate(files):
+
+        wipe_file(file)
+
+        percent = ((i+1)/total)*100
+        progress["value"] = percent
+        root.update()
+
+    messagebox.showinfo("Completed","Folder wiped successfully")
+
+# -------------------------
+# SCAN SENSITIVE FILES
+# -------------------------
+
+def scan_files():
+
+    folder = filedialog.askdirectory()
+
+    if not folder:
+        return
+
+    sensitive = [".pdf",".docx",".xlsx",".txt",".csv"]
+
+    count = 0
+
+    for r,d,f in os.walk(folder):
+
+        for file in f:
+
+            if any(file.lower().endswith(x) for x in sensitive):
+                count += 1
+
+    messagebox.showinfo("Scan Result",f"{count} sensitive files found")
+
+# -------------------------
+# RECOVERY TEST
+# -------------------------
+
+def recovery_test():
+
+    chance = random.randint(0,10)
+
+    messagebox.showinfo(
+        "Recovery Simulation",
+        f"Recovery chance after secure wipe: {chance}%"
+    )
+
+# -------------------------
+# EXPORT PDF CERTIFICATE
+# -------------------------
+
+def export_pdf():
+
+    if not os.path.exists(log_file):
+
+        messagebox.showwarning("Warning","No log found")
+        return
+
+    hash_value = generate_hash()
+
+    qr_file = generate_qr(hash_value)
+
+    sign_log()
+
+    pdf_file = "wipe_certificate.pdf"
+
+    styles = getSampleStyleSheet()
+
+    elements = []
+
+    elements.append(Paragraph("Secure Data Wipe Certificate",styles["Title"]))
+    elements.append(Spacer(1,20))
+
+    elements.append(Paragraph("Log Entries:",styles["Heading2"]))
+    elements.append(Spacer(1,10))
+
+    with open(log_file) as f:
+
+        for line in f:
+            elements.append(Paragraph(line,styles["Normal"]))
+            elements.append(Spacer(1,4))
+
+    elements.append(Spacer(1,20))
+
+    elements.append(Paragraph("SHA256 Hash:",styles["Heading2"]))
+    elements.append(Paragraph(hash_value,styles["Normal"]))
+
+    elements.append(Spacer(1,20))
+
+    elements.append(Paragraph("Verification QR Code:",styles["Heading2"]))
+    elements.append(Image(qr_file,width=120,height=120))
+
+    doc = SimpleDocTemplate(pdf_file)
+    doc.build(elements)
+
+    messagebox.showinfo("PDF Created","wipe_certificate.pdf generated")
+
+# -------------------------
+# CLEAR LOG
+# -------------------------
+
+def clear_log():
+
+    if os.path.exists(log_file):
+        os.remove(log_file)
+
+    messagebox.showinfo("Log","Log cleared")
+
+# -------------------------
+# BUTTONS
+# -------------------------
+
+frame = tk.Frame(root,bg="#1e1e1e")
+frame.pack(pady=20)
+
+buttons = [
+
+("Wipe File","#0078D7",select_file),
+("Wipe Folder","#2ecc71",select_folder),
+("Scan Sensitive Files","#f39c12",scan_files),
+("Recovery Simulation","#9b59b6",recovery_test),
+("Download PDF Certificate","#e74c3c",export_pdf),
+("Clear Log","#555555",clear_log)
+
+]
+
+for text,color,cmd in buttons:
+
+    b = tk.Button(
+        frame,
+        text=text,
+        width=30,
+        bg=color,
+        fg="white",
+        command=cmd
+    )
+
+    b.pack(pady=4)
+
+root.mainloop()

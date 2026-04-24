@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZeroTrace Central Command</title>
+    <style>
+        body { background-color: #0d1117; color: #00ff00; font-family: 'Courier New', Courier, monospace; display: flex; flex-direction: column; align-items: center; padding-top: 50px; margin: 0; }
+        h1 { color: #ff3333; text-transform: uppercase; letter-spacing: 2px; }
+        .dashboard { background-color: #161b22; padding: 30px; border-radius: 10px; border: 1px solid #30363d; width: 600px; box-shadow: 0 0 20px rgba(255, 51, 51, 0.2); }
+        .input-group { margin-bottom: 20px; }
+        input[type="text"] { width: 100%; padding: 10px; background: #000; border: 1px solid #00ff00; color: #00ff00; font-family: inherit; box-sizing: border-box; margin-top: 10px;}
+        button { background-color: #ff3333; color: white; border: none; padding: 12px 20px; font-weight: bold; cursor: pointer; width: 100%; font-family: inherit; text-transform: uppercase; transition: 0.3s;}
+        button:hover { background-color: #cc0000; }
+        .terminal { background: #000; padding: 15px; border-radius: 5px; margin-top: 20px; height: 150px; overflow-y: auto; border: 1px solid #30363d; font-size: 0.9em; white-space: pre-wrap; }
+        .cert { color: #58a6ff; }
+    </style>
+</head>
+<body>
+
+    <h1>🌐 ZeroTrace Central Command</h1>
+    
+    <div class="dashboard">
+        <div class="input-group">
+            <label>Target Machine Path (Directory):</label>
+            <input type="text" id="targetPath" placeholder="e.g., C:/Users/Public/TestFolder">
+        </div>
+        
+        <button onclick="initiateWipe()">⚠️ INITIATE SECURE WIPE ⚠️</button>
+        
+        <div class="terminal" id="outputConsole">
+            [SYSTEM] Awaiting command...
+        </div>
+    </div>
+
+    <script>
+        function logToConsole(message, isCert = false) {
+            const consoleBox = document.getElementById('outputConsole');
+            const colorClass = isCert ? 'class="cert"' : '';
+            consoleBox.innerHTML += `\n<span ${colorClass}>${message}</span>`;
+            consoleBox.scrollTop = consoleBox.scrollHeight;
+        }
+
+        async function initiateWipe() {
+            const target = document.getElementById('targetPath').value;
+            if (!target) return alert("Please enter a target path.");
+
+            logToConsole(`\n[ADMIN] Executing remote strike on: ${target}...`);
+            logToConsole(`[ADMIN] Waiting for Agent response (This may take a moment for large folders)...`);
+
+            try {
+                // Send the request to our Admin Python Server
+                const response = await fetch(`/execute-remote-wipe?target_folder=${encodeURIComponent(target)}`, {
+                    method: 'POST'
+                });
+                
+                const data = await response.json();
+                
+                if (data.status === "success") {
+                    logToConsole(`[SUCCESS] ${data.message}`);
+                    logToConsole(`[CERTIFICATE] ID: ${data.certificate.certificate_id}`, true);
+                    logToConsole(`[CERTIFICATE] Status: ${data.certificate.status}`, true);
+                    logToConsole(`[CERTIFICATE] Files Destroyed: ${data.certificate.files_destroyed}`, true);
+                } else {
+                    logToConsole(`[ERROR] ${data.message || 'Mission failed.'}`);
+                }
+            } catch (error) {
+                logToConsole(`[CRITICAL ERROR] Failed to connect to Central Command.`);
+            }
+        }
+    </script>
+</body>
+</html>

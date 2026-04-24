@@ -1,0 +1,10 @@
+[
+    {
+        "certificate_id": "ZT-D720A13B",
+        "timestamp": "2026-04-09T22:36:47.558337",
+        "target_path": "C:\\excel learning\\excel formula writing",
+        "files_destroyed": 1,
+        "method": "DoD 5220.22-M (3-Pass Cryptographic Overwrite)",
+        "status": "VERIFIED_DESTROYED"
+    }
+]
