@@ -22,5 +22,32 @@
         "files_destroyed": 1,
         "method": "DoD 5220.22-M (3-Pass Cryptographic Overwrite)",
         "status": "VERIFIED_DESTROYED"
+    },
+    {
+        "certificate_id": "ZT-B5521C26",
+        "timestamp": "2026-04-24T21:07:13.750175",
+        "target_path": "C:\\pokemon",
+        "files_destroyed": 4,
+        "standard": "Gutmann (35-pass)",
+        "file_hashes_pre_wipe": [
+            {
+                "file": "C:\\pokemon\\DocScanner 17-Feb-2026 10-50 am.pdf",
+                "sha256_pre_wipe": "945786f5c6ffa9b3c313604c802ea85d5e277d4cf34c9a97a6ca4863cb920193"
+            },
+            {
+                "file": "C:\\pokemon\\DWM Assignment1.pdf",
+                "sha256_pre_wipe": "3be619f5ed07b1652a2910552096300db4493dfae62f6a040d0d2b735407d93d"
+            },
+            {
+                "file": "C:\\pokemon\\ETL LAB MANUAL-FINAL (2).pdf",
+                "sha256_pre_wipe": "400f8821457e102d3c44193d6ebff0bb6b74760e62a5d577f708683112e3a554"
+            },
+            {
+                "file": "C:\\pokemon\\Practical 3 DAA.pdf",
+                "sha256_pre_wipe": "c19c5b770534115204b7770db2706829a4c398a0f06dae50cc583f6c63739925"
+            }
+        ],
+        "status": "VERIFIED_DESTROYED",
+        "rsa_signature": "595845f6d411775c498580b19bc026e94d29e6a26867be6648f704685a3af06d"
     }
 ]
